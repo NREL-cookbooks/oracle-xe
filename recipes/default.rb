@@ -69,3 +69,16 @@ execute "unlock-oracle-system-accounts" do
   group 'dba' # required
   action :nothing
 end
+
+listener_sql = File.join(Chef::Config[:file_cache_path], 'set-oracle-listener-local-access.sql')
+template listener_sql do
+  action :create
+  notifies :run, 'execute[set-oracle-listener-local-access]', :immediately
+end
+
+execute "set-oracle-listener-local-access" do
+  command "source /u01/app/oracle/product/11.2.0/xe/bin/oracle_env.sh && sqlplus / as system @#{listener_sql}"
+  user 'oracle'
+  group 'dba' # required
+  action :nothing
+end
